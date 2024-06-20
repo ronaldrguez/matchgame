@@ -30,15 +30,16 @@ class LoadingMatchGameState extends MatchGameState {
 class InMatchGameState extends MatchGameState {
   final MatchGame matchGame;
   final DateTime? startGame;
+  final List<ImageGame> chosen;
 
-  InMatchGameState({required this.matchGame, this.startGame});
-
-  @override
-  List<Object?> get props => [matchGame, startGame];
+  InMatchGameState({required this.matchGame, this.startGame, this.chosen = const []});
 
   @override
-  InMatchGameState copyWith({MatchGame? matchGame, DateTime? startGame}) {
-    return InMatchGameState(matchGame: matchGame ?? this.matchGame, startGame: startGame ?? this.startGame);
+  List<Object?> get props => [matchGame, startGame, chosen];
+
+  @override
+  InMatchGameState copyWith({MatchGame? matchGame, DateTime? startGame, List<ImageGame>? chosen}) {
+    return InMatchGameState(matchGame: matchGame ?? this.matchGame, startGame: startGame ?? this.startGame, chosen: chosen ?? this.chosen);
   }
 }
 

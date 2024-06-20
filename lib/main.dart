@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:matchgame/bloc/choose/choose_bloc.dart';
 import 'package:matchgame/bloc/ranking/ranking_bloc.dart';
 import 'package:matchgame/bloc/match_game/match_game_bloc.dart';
 import 'package:matchgame/bloc/user/user_bloc.dart';
@@ -100,7 +99,6 @@ class _MyAppState extends State<MyApp> {
           providers: [
             BlocProvider<UserBloc>(create: (_) => UserBloc(const AuthRepository())),
             BlocProvider<RankingBloc>(create: (_) => RankingBloc(const RankingRepository())),
-            BlocProvider<ChooseBloc>(create: (_) => ChooseBloc(),),
             BlocProvider<MatchGameBloc>(create: (_) => MatchGameBloc(const MatchGameRepository()),)
           ],
           child: MaterialApp(

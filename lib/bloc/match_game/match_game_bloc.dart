@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:matchgame/models/image_game.dart';
@@ -16,51 +18,74 @@ class MatchGameBloc extends Bloc<MatchGameEvent, MatchGameState>{
       try {
         emit(LoadingMatchGameState());
         MatchGame matchGame = _repository.getMatchGame();
-        emit(InMatchGameState(matchGame: matchGame));
+        emit(InMatchGameState(matchGame: matchGame, startGame: DateTime.now()));
       } catch (e) {
         emit(ErrorMatchGameState(e.toString()));
       }
     });
 
-    on<MatchingImagesEvent>((event, emit) async {
+    on<ExpiringImageRevealEvent>((event, emit) async {
       try {
         if(state is InMatchGameState) {
           late MatchGame matchGame;
           var auxState = state as InMatchGameState;
-          if(event.comparison) {
-            var images = <ImageGame>[];
-            int i = 0;
-            while(i < auxState.matchGame.images.length) {
-              event.chosen.map((e) => e.id).contains(auxState.matchGame.images.elementAt(i).id) ? images.add(auxState.matchGame.images.elementAt(i).copyWith(isShow: true)) : images.add(auxState.matchGame.images.elementAt(i));
-              i++;
+          var chosen = auxState.chosen;
+          var images = <ImageGame>[];
+          for(var choose in chosen) {
+            if (choose.id == event.expiredImage.id) {
+              chosen.remove(choose);
+              break;
             }
-            matchGame = auxState.matchGame.copyWith(images: images, rights: auxState.matchGame.rights + 1);
-          } else {
-            matchGame = auxState.matchGame.copyWith(errors: auxState.matchGame.errors + 1);
           }
-          if(matchGame.images.map((e) => e.isShow).where((element) => element == true).length == matchGame.images.length){
-            matchGame = matchGame.copyWith(duration: DateTime.now().difference(auxState.startGame!).inSeconds);
-            _repository.save(matchGame);
-            emit(CompleteMatchGameState(matchGame));
-          } else {
-            emit(auxState.copyWith(matchGame: matchGame));
+          int i = 0;
+          while (i < auxState.matchGame.images.length) {
+            if(event.expiredImage.id == auxState.matchGame.images[i].id) {
+              images.add(auxState.matchGame.images[i].copyWith(isShow: false));
+            } else {
+              images.add(auxState.matchGame.images[i]);
+            }
+            i++;
           }
+          matchGame = auxState.matchGame.copyWith(images: images,);
+          emit(auxState.copyWith(matchGame: matchGame, chosen: chosen));
         }
       } catch (e) {
         emit(ErrorMatchGameState(e.toString()));
       }
     });
 
-    on<HideImagesEvent>((event, emit) async {
+    on<ChoosingImageEvent>((event, emit) async {
       try {
         if(state is InMatchGameState) {
           var auxState = state as InMatchGameState;
-          final images = <ImageGame>[];
-          for (var image in auxState.matchGame.images) {
-            images.add(image.copyWith(isShow: false));
+          MatchGame matchGame = auxState.matchGame;
+          var chosen = [...auxState.chosen, event.chosen];
+          if(chosen.length.isEven) {
+            var images = <ImageGame>[];
+            if(chosen[0].symbol == chosen[1].symbol) {
+              int i = 0;
+              while (i < auxState.matchGame.images.length) {
+                if(chosen.sublist(0,2).map((e) => e.id).contains(auxState.matchGame.images[i].id)) {
+                  images.add(auxState.matchGame.images[i].copyWith(isShow: true));
+                } else {
+                  images.add(auxState.matchGame.images[i]);
+                }
+                i++;
+              }
+              matchGame = auxState.matchGame.copyWith(images: images, rights: auxState.matchGame.rights + 1,);
+            } else {
+              matchGame = auxState.matchGame.copyWith(errors: auxState.matchGame.errors + 1);
+            }
+            emit(auxState.copyWith(matchGame: matchGame, chosen: chosen.length > 2 ? chosen.sublist(2) : []));
+          } else {
+            emit(auxState.copyWith(chosen: chosen));
           }
-          var matchGame = auxState.matchGame.copyWith(images: images);
-          emit(auxState.copyWith(matchGame: matchGame, startGame: DateTime.now()));
+          var x = matchGame.images.map((e) => e.isShow).where((element) => element == true).length == matchGame.images.length;
+          if(x){
+            matchGame = matchGame.copyWith(duration: DateTime.now().difference(auxState.startGame!).inSeconds);
+            _repository.save(matchGame);
+            emit(CompleteMatchGameState(matchGame));
+          }
         }
       } catch (e) {
         emit(ErrorMatchGameState(e.toString()));
@@ -79,5 +104,27 @@ class MatchGameBloc extends Bloc<MatchGameEvent, MatchGameState>{
         emit(ErrorMatchGameState(e.toString()));
       }
     });
+
+    on<HideImageEvent>((event, emit) async {
+      var images = <ImageGame>[];
+      if(state is InMatchGameState) {
+        late MatchGame matchGame;
+        var auxState = state as InMatchGameState;
+        int i = 0;
+        while (i < auxState.matchGame.images.length) {
+          images.add(auxState.matchGame.images[i].copyWith(isShow: false));
+          i++;
+        }
+        matchGame = auxState.matchGame.copyWith(images: images,);
+        emit(auxState.copyWith(matchGame: matchGame,));
+      }
+    });
+  }
+
+  @override
+  void onTransition(Transition<MatchGameEvent, MatchGameState> transition) {
+    log(' Event: ${transition.event.toString()}');
+    log('State: ${transition.currentState.toString()}');
+    super.onTransition(transition);
   }
 }

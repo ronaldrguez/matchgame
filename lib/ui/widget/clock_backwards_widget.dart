@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:matchgame/bloc/choose/choose_bloc.dart';
 import 'package:matchgame/bloc/match_game/match_game_bloc.dart';
 
 class ClockBackwardsWidget extends StatefulWidget {
@@ -17,12 +16,10 @@ class _ClockBackwardsWidgetState extends State<ClockBackwardsWidget> {
   late int min;
   late int second;
   late MatchGameBloc bloc;
-  late ChooseBloc chooseBloc;
 
   @override
   void initState() {
     bloc = context.read<MatchGameBloc>();
-    chooseBloc = context.read<ChooseBloc>();
     min = 2;
     second = 0;
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -32,9 +29,8 @@ class _ClockBackwardsWidgetState extends State<ClockBackwardsWidget> {
       } else if (second > 0) {
         second--;
       } else {
-        bloc.add(EndMatchGameEvent());
-        chooseBloc.add(ResetChoose());
         timer.cancel();
+        bloc.add(EndMatchGameEvent());
       }
       setState(() {});
     });

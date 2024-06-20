@@ -7,13 +7,10 @@ class NavigationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (value) async {
         if (AppNavigator().pages.value.length > 1) {
           AppNavigator().pop();
-          return false;
-        } else {
-          return false;
         }
       },
       child: const NavigationLayer(

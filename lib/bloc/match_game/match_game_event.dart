@@ -4,14 +4,19 @@ abstract class MatchGameEvent {}
 
 class LoadingMatchGameEvent extends MatchGameEvent {}
 
-class MatchingImagesEvent extends MatchGameEvent {
-  final List<ImageGame> chosen;
-  final bool comparison;
+class ChoosingImageEvent extends MatchGameEvent {
+  final ImageGame chosen;
 
-  MatchingImagesEvent(this.chosen, this.comparison);
+  ChoosingImageEvent(this.chosen,);
 }
 
-class EndMatchGameEvent extends MatchGameEvent{}
+class ExpiringImageRevealEvent extends MatchGameEvent {
+  final ImageGame expiredImage;
 
-class HideImagesEvent extends MatchGameEvent {}
+  ExpiringImageRevealEvent(this.expiredImage,);
+}
+
+class HideImageEvent extends MatchGameEvent{}
+
+class EndMatchGameEvent extends MatchGameEvent{}
 
