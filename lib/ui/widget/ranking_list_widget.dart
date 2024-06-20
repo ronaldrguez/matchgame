@@ -18,9 +18,9 @@ class RankingList extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 5.0),
           child: ListTile(
-            leading: Text('Pos', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.indigoAccent),),
-            title: Text('Users', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.indigoAccent),),
-            trailing: Text('Duration', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.indigoAccent),),
+            leading: Text('Pos', style: Theme.of(context).textTheme.titleMedium),
+            title: Text('Users', style: Theme.of(context).textTheme.titleMedium),
+            trailing: Text('Duration', style: Theme.of(context).textTheme.titleMedium),
           ),
         ),
         ListView.builder(
